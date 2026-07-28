@@ -1,0 +1,440 @@
+{
+  "name": "Social Media AI agent",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        48,
+        112
+      ],
+      "id": "bb8d216b-eff8-480e-90f4-35bbb2de3c79",
+      "name": "When chat message received",
+      "webhookId": "4dbfeafa-2256-49a5-955d-d26fc2dfc467"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        160,
+        288
+      ],
+      "id": "6c02162f-0313-4b0e-92c7-d4196414bb68",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "wyKywtDVIrCKNsAN",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appTu4RlCXFfuWW4u",
+          "mode": "list",
+          "cachedResultName": "Social Media Agent ",
+          "cachedResultUrl": "https://airtable.com/appTu4RlCXFfuWW4u"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblovjYPu3uf61Z0A",
+          "mode": "list",
+          "cachedResultName": "Table 1",
+          "cachedResultUrl": "https://airtable.com/appTu4RlCXFfuWW4u/tblovjYPu3uf61Z0A"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Topic": "={{ $json.output.topic }}",
+            "Facebook Post": "={{ $json.output.facebook_post }}",
+            "Instagram Caption": "={{ $json.output.instagram_caption }}",
+            "LinkedIn Post": "={{ $json.output.linkedin_post }}",
+            "YouTube Title": "={{ $json.output.youtube_title }}",
+            "Hashtags": "={{ $json.output.youtube_title }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Topic",
+              "displayName": "Topic",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Facebook Post",
+              "displayName": "Facebook Post",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Instagram Caption",
+              "displayName": "Instagram Caption",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "LinkedIn Post",
+              "displayName": "LinkedIn Post",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "YouTube Title",
+              "displayName": "YouTube Title",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Hashtags",
+              "displayName": "Hashtags",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        752,
+        96
+      ],
+      "id": "0db954cd-e0f0-41c4-bedc-3c286aee0e3f",
+      "name": "Create a record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "5nJyOZYHsDr80buj",
+          "name": "Airtable Personal Access Token account 2"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.4,
+      "position": [
+        320,
+        288
+      ],
+      "id": "3ded1c3d-2d9a-4f24-9168-697b59472f82",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "JbKSeP48TT8hPBjK",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "<Goal>\n\n<Primary>\nGenerate a complete social media content package based on the user's topic while always returning a valid JSON object that exactly matches the required output schema.\n</Primary>\n\n<Secondary>\nThe platform mentioned by the user is only used to identify the topic and does not limit the generated content.\n</Secondary>\n\n</Goal>\n\n<Instructions>\n\n<Instruction>\nCarefully analyze the user's request and identify the main topic.\n</Instruction>\n\n<Instruction>\nAlways use the user's requested topic as the value of the \"topic\" field.\n</Instruction>\n\n<Instruction>\nThe platform mentioned by the user must NEVER limit the response.\n</Instruction>\n\n<Instruction>\nIf the user requests only a Facebook Post, Instagram Caption, LinkedIn Post, YouTube Title, or Hashtags, still generate content for ALL supported platforms.\n</Instruction>\n\n<Instruction>\nEvery response MUST generate all of the following:\n- topic\n- facebook_post\n- instagram_caption\n- linkedin_post\n- youtube_title\n- hashtags\n- date\n</Instruction>\n\n<Instruction>\nGenerate a high-quality Facebook post that is engaging and suitable for Facebook.\n</Instruction>\n\n<Instruction>\nGenerate an engaging Instagram caption using relevant emojis where appropriate.\n</Instruction>\n\n<Instruction>\nGenerate a professional LinkedIn post suitable for a business audience.\n</Instruction>\n\n<Instruction>\nGenerate an SEO-friendly and attention-grabbing YouTube title.\n</Instruction>\n\n<Instruction>\nGenerate relevant hashtags as one combined string separated by spaces.\n</Instruction>\n\n<Instruction>\nReturn today's date using the YYYY-MM-DD format.\n</Instruction>\n\n<Instruction>\nNever leave any field empty.\n</Instruction>\n\n<Instruction>\nAlways populate every field in the output schema regardless of the user's wording.\n</Instruction>\n\n<Instruction>\nNever return content for only one platform.\n</Instruction>\n\n</Instructions>\n\n<StructuredOutput>\n\n<Schema>\n\n{\n  \"topic\": \"string\",\n  \"facebook_post\": \"string\",\n  \"instagram_caption\": \"string\",\n  \"linkedin_post\": \"string\",\n  \"youtube_title\": \"string\",\n  \"hashtags\": \"string\",\n  \"date\": \"string\"\n}\n\n</Schema>\n\n<Rules>\n\n<Rule>\nReturn ONLY one valid JSON object.\n</Rule>\n\n<Rule>\nThe JSON must exactly match the schema above.\n</Rule>\n\n<Rule>\nDo not add extra fields.\n</Rule>\n\n<Rule>\nDo not remove any fields.\n</Rule>\n\n<Rule>\nDo not change field names.\n</Rule>\n\n<Rule>\nAll fields are required.\n</Rule>\n\n<Rule>\nThe \"topic\" field must contain the user's original topic.\n</Rule>\n\n<Rule>\nThe \"facebook_post\" field must contain a complete Facebook post.\n</Rule>\n\n<Rule>\nThe \"instagram_caption\" field must contain an engaging Instagram caption with appropriate emojis.\n</Rule>\n\n<Rule>\nThe \"linkedin_post\" field must contain a professional LinkedIn post.\n</Rule>\n\n<Rule>\nThe \"youtube_title\" field must contain an SEO-friendly YouTube title.\n</Rule>\n\n<Rule>\nThe \"hashtags\" field must contain all relevant hashtags as one combined string separated by spaces.\n</Rule>\n\n<Rule>\nThe \"date\" field must be returned in YYYY-MM-DD format.\n</Rule>\n\n<Rule>\nReturn plain JSON only.\n</Rule>\n\n<Rule>\nDo not return Markdown.\n</Rule>\n\n<Rule>\nDo not wrap the JSON inside ```json.\n</Rule>\n\n<Rule>\nDo not include explanations, notes, or any text before or after the JSON.\n</Rule>\n\n</Rules>\n\n</StructuredOutput>"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        384,
+        96
+      ],
+      "id": "f2b99119-e407-45fa-a5d6-830a9780efa6",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"topic\": \"User's original topic\",\n  \"facebook_post\": \"Complete Facebook post\",\n  \"instagram_caption\": \"Instagram caption with emojis\",\n  \"linkedin_post\": \"Professional LinkedIn post\",\n  \"youtube_title\": \"SEO-friendly YouTube title\",\n  \"hashtags\": \"#AI #Automation #n8n\",\n  \"date\": \"YYYY-MM-DD\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        560,
+        304
+      ],
+      "id": "e5e532b4-0ee4-41db-9ea5-8d44795d68e8",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('AI Agent').item.json.output }}",
+        "options": {
+          "systemMessage": "The social media content has been successfully saved.\n\nPresent the content in a clean, user-friendly format.\n\nDo not return JSON.\n\nFormat:\n\n✅ Content Created Successfully\n\nTopic:\n...\n\nFacebook Post:\n...\n\nInstagram Caption:\n...\n\nLinkedIn Post:\n...\n\nYouTube Title:\n...\n\nHashtags:\n..."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        960,
+        96
+      ],
+      "id": "4f2251cf-bdfd-4765-b338-9871cfe7f75f",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        832,
+        304
+      ],
+      "id": "b20e7664-6341-490b-852d-589a0ad25edf",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "wyKywtDVIrCKNsAN",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b607bcc4-d445-4fa1-adcd-38bef1416cd3",
+              "name": "Facebook Post ",
+              "value": "={{ $('AI Agent').item.json.output.facebook_post }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1312,
+        96
+      ],
+      "id": "6fff6441-863b-4a7b-9210-588199ea1cb7",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appTu4RlCXFfuWW4u",
+          "mode": "list",
+          "cachedResultName": "Social Media Agent ",
+          "cachedResultUrl": "https://airtable.com/appTu4RlCXFfuWW4u"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblJwoAbEFPhUCOOr",
+          "mode": "list",
+          "cachedResultName": "2ND",
+          "cachedResultUrl": "https://airtable.com/appTu4RlCXFfuWW4u/tblJwoAbEFPhUCOOr"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Facebook Post": "={{ $json['Facebook Post '] }}"
+          },
+          "matchingColumns": [
+            "Facebook Post"
+          ],
+          "schema": [
+            {
+              "id": "Facebook Post",
+              "displayName": "Facebook Post",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        1520,
+        96
+      ],
+      "id": "c882927e-927b-4090-934a-8a48637f01c7",
+      "name": "Create a record1",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "5nJyOZYHsDr80buj",
+          "name": "Airtable Personal Access Token account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        []
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Create a record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a record": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Create a record1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "3ebd4d74-2fff-4947-8e5f-5e5d6c9c2751",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ab95fd4ec5396db6d41b1da3c8be795e7e810f6e5635b471a615009e0208fd7a"
+  },
+  "nodeGroups": [],
+  "id": "9SE2EI2BQJxV6MkS",
+  "tags": []
+}
